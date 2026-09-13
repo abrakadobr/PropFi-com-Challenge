@@ -1,0 +1,13 @@
+{
+  "name": "school-mgmt-e2e-tests",
+  "private": true,
+  "version": "1.0.0",
+  "description": "E2E tests for the school management system",
+  "scripts": {
+    "open": "npx cypress open",
+    "test:e2e": "cypress run --config-file cypress.config.js"
+  },
+  "devDependencies": {
+    "cypress": "^16.0.0"
+  }
+}
