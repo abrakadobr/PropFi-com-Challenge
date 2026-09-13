@@ -1,0 +1,72 @@
+services:
+  postgres:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-postgres}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-postgres}
+      POSTGRES_DB: ${POSTGRES_DB:-school_mgmt}
+    ports:
+      - "5432:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+      - ./seed_db/tables.sql:/docker-entrypoint-initdb.d/01-tables.sql
+      - ./seed_db/seed-db.sql:/docker-entrypoint-initdb.d/02-seed.sql
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-postgres} -d ${POSTGRES_DB:-school_mgmt}"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  backend:
+    build:
+      context: .
+      dockerfile: dockers/backend.Dockerfile
+    ports:
+      - "5007:${PORT-5007}"
+    environment:
+      PORT: ${PORT:-5007}
+      DATABASE_URL: ${DATABASE_URL:-postgresql://postgres:postgres@postgres:5432/school_mgmt}
+      JWT_ACCESS_TOKEN_SECRET: ${JWT_ACCESS_TOKEN_SECRET:-docker_jwt_access_secret}
+      JWT_REFRESH_TOKEN_SECRET: ${JWT_REFRESH_TOKEN_SECRET:-docker_jwt_refresh_secret}
+      CSRF_TOKEN_SECRET: ${CSRF_TOKEN_SECRET:-docker_csrf_secret}
+      JWT_ACCESS_TOKEN_TIME_IN_MS: ${JWT_ACCESS_TOKEN_TIME_IN_MS:-900000}
+      JWT_REFRESH_TOKEN_TIME_IN_MS: ${JWT_REFRESH_TOKEN_TIME_IN_MS:-28800000}
+      CSRF_TOKEN_TIME_IN_MS: ${CSRF_TOKEN_TIME_IN_MS:-950000}
+      MAIL_FROM_USER: ${MAIL_FROM_USER:-noreply@school-admin.com}
+      EMAIL_VERIFICATION_TOKEN_SECRET: ${EMAIL_VERIFICATION_TOKEN_SECRET:-docker_email_verification_secret}
+      EMAIL_VERIFICATION_TOKEN_TIME_IN_MS: ${EMAIL_VERIFICATION_TOKEN_TIME_IN_MS:-18000000}
+      PASSWORD_SETUP_TOKEN_SECRET: ${PASSWORD_SETUP_TOKEN_SECRET:-docker_password_setup_secret}
+      PASSWORD_SETUP_TOKEN_TIME_IN_MS: ${PASSWORD_SETUP_TOKEN_TIME_IN_MS:-300000}
+      UI_URL: ${UI_URL:-http://localhost:5173}
+      API_URL: ${API_URL:-http://localhost:5007}
+      COOKIE_DOMAIN: ${COOKIE_DOMAIN:-localhost}
+      RESEND_API_KEY: ${RESEND_API_KEY:-re_placeholder}
+      NODE_ENV: ${NODE_ENV:-development}
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+  frontend:
+    build:
+      context: .
+      dockerfile: dockers/frontend.Dockerfile
+      args:
+        VITE_API_URL: ${VITE_API_URL:-http://localhost:5007}
+    ports:
+      - "5173:5173"
+    depends_on:
+      - backend
+
+  pgadmin:
+    image: dpage/pgadmin4:latest
+    environment:
+      PGADMIN_DEFAULT_EMAIL: ${PGADMIN_DEFAULT_EMAIL:-admin@pgadmin.com}
+      PGADMIN_DEFAULT_PASSWORD: ${PGADMIN_DEFAULT_PASSWORD:-secret}
+    ports:
+      - "5050:80"
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+volumes:
+  pgdata:

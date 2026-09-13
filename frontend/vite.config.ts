@@ -14,7 +14,7 @@ export default ({ mode }: { mode: string }) => {
       }
     },
     server: {
-      open: '/app'
+      open: false // '/app'
     }
   });
 };
