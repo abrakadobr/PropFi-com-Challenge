@@ -7,8 +7,8 @@
 // Rule enforced here: a 500 from any visited route fails the test.
 //
 // Deliberate exclusions (routes NOT covered here, with reasons):
-//   * students/*        : controllers are unimplemented challenge stubs
-//                         ("// write your code" -> request hangs, no response)
+//   * students/*        : covered separately in students.cy.js (backend bug
+//                         in setStudentStatus arg mapping fixed)
 //   * POST /staffs/:id/status : can disable the admin's own account
 //                         (disabled admin -> lockout; previously bit us)
 //   * POST /staffs (add) + resend-email-verification + resend-pwd-setup-link:
