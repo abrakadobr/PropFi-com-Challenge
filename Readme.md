@@ -10,10 +10,47 @@ skill-test/
 ├── backend/            # Node.js + Express + PostgreSQL
 ├── go-service/         # Golang microservice for PDF reports
 ├── seed_db/            # Database schema and seed data
+├── dockers/            # Dockerfiles for development containers
+├── tests/              # Cypress test framework with backend tests
+├── docker-compose.yml  # Compose file for development environment
+├── .env.example        # Example with default values for env configurable variables 
 └── README.md           # This file
 ```
 
-## 🚀 Quick Start
+## 🚀 Really Quick Start
+
+### Prerequisites
+- docker
+- docker compose
+
+### 1. App quick start
+```bash
+docker compose up --build
+```
+
+This will build and launch:
+
+- Postgres DataBase, initialized by seed_db
+- Postgress Admin - UI for postgres db on http://localhost:5050
+- Backend node with default access on http://localhost:5007
+- Frontend dev build on http://localhost:5173
+
+### 2. Cypress tests UI 
+```bash
+cd tests && npm i && npm run open
+```
+
+Currently only 2 tests defined:
+
+- Guest Access Test - testing backend routes without providing any Credentials
+- Admin Access Test - testing backend routes authorized as admin-level user
+
+#### Development TODO
+
+- Add other tests for "teacher/student/..." roles.
+- Add "scenarios tests" for expecting platform users behaviors
+
+## 🚀 Not Really Quick Start
 
 ### Prerequisites
 - Node.js (v16 or higher)
@@ -35,14 +72,7 @@ npm install
 npm run dev
 ```
 
-### 3. Access the Application
-- **Frontend**: http://localhost:5173
-- **Backend API**: http://localhost:5007
-- **Demo Credentials**: 
-  - Email: `admin@school-admin.com`
-  - Password: `3OU4zn3q6Zh9`
-
-### ** Database Setup **
+### 3. ** Database Setup **
 ```bash
 # Create PostgreSQL database
 createdb school_mgmt
@@ -51,6 +81,14 @@ createdb school_mgmt
 psql -d school_mgmt -f seed_db/tables.sql
 psql -d school_mgmt -f seed_db/seed-db.sql
 ```
+
+## Access the Application
+- **Frontend**: http://localhost:5173
+- **Backend API**: http://localhost:5007
+- **Demo Credentials**: 
+  - Email: `admin@school-admin.com`
+  - Password: `3OU4zn3q6Zh9`
+
 
 ## 🎯 Skill Test Problems
 
@@ -61,6 +99,7 @@ psql -d school_mgmt -f seed_db/seed-db.sql
 - **Issue**: When clicking the 'Save' button, the 'description' field doesn't get saved
 - **Skills Tested**: React, Form handling, State management, API integration
 - **Expected Fix**: Ensure description field is properly bound and submitted
+- **Fix**: [commit](https://github.com/abrakadobr/PropFi-com-Challenge/commit/f197092cb63e7a524d70a910eef7e26c7f889426) - wrong naming of "description" field as "content" (possible outdated) 
 
 ### **Backend Developer Challenge**
 **Complete CRUD Operations in Student Management**
@@ -69,6 +108,7 @@ psql -d school_mgmt -f seed_db/seed-db.sql
 - **Issue**: Implement missing CRUD operations for student management
 - **Skills Tested**: Node.js, Express, PostgreSQL, API design
 - **Expected Implementation**: Full Create, Read, Update, Delete operations
+- **Fix**: [commit](https://github.com/abrakadobr/PropFi-com-Challenge/commit/57d637bd6e3f5d8443209a9707430b4694a97ce6)
 
 ## 🛠️ Technology Stack
 
@@ -205,3 +245,23 @@ For questions and support:
 ---
 
 **Happy Coding! 🚀**
+
+## Outro
+
+Codebase is very outdated and should not be used for any other reasons.
+Node18 is required for correct build and this version is officially unsupported.
+
+### Frontend
+
+General react problems when project grows bigger then 2 pages. 10k lines of code for 10 pages dashboard are harder and harder supported in future. Strong recommendation switch to Vue/Vuex so fast as possible.
+
+### Backend
+
+Overcomplicated code with strange non-required dependencies.
+Bad scale-ability, architecture not allows traffic control by roles/geodata/time, there is no realtime communication.
+
+### Database
+
+I would rise a question about database functions as additional layer of complexity and having business logic inside database.
+There are two points: having backend as business logic, or having "cloud app" (like firebase/supabase) with business logic in database/cloud functions.
+Current architecture mixing both without obvious reasons or wins but with obvious looses.
